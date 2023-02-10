@@ -58,9 +58,5 @@ if spectrum[peak_freq] > squelch_level:
         pass
     else:
         print("Peak frequency: {:.6f} MHz".format(peak_freq / 1e6 + start_freq / 1e6))
-        psd(samples, NFFT=1024, Fs=sdr.sample_rate/1e6, Fc=sdr.center_freq/1e6)
-        xlabel('Frequency (MHz)')
-        ylabel('Relative power (dB)')
-        show()
 
 sdr.close()
