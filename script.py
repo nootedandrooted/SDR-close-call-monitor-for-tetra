@@ -8,7 +8,7 @@ import datetime
 # Set the SDR device parameters
 sdr = RtlSdr()
 sdr.sample_rate = 2.4e6  # Hz
-sdr.center_freq = 390e6  # Hz
+sdr.center_freq = 392e6  # Hz
 sdr.freq_correction = 60   # PPM
 sdr.gain = 2              # dB
 
