@@ -2,9 +2,8 @@ import os
 import numpy as np
 import time
 from rtlsdr import RtlSdr
-from pylab import *
-from rtlsdr import *
 import csv
+import datetime
 
 # Set the SDR device parameters
 sdr = RtlSdr()
@@ -23,18 +22,10 @@ num_samples = 2**16
 # Set the threshold for the squelch level
 squelch_level = 100
 
-
-# Read samples from the SDR device
-samples = sdr.read_samples(num_samples)
-# Convert the samples to a power spectrum
-spectrum = np.abs(np.fft.fftshift(np.fft.fft(samples)))
-# Find the peak frequency in the spectrum
-peak_freq = np.argmax(spectrum)
-
 with open('frequency_usage.csv', 'w', newline='') as file:
     writer = csv.writer(file)
     writer.writerow(['Time', 'Frequency (MHz)'])
-    
+
     while True:
         # Read samples from the SDR device
         samples = sdr.read_samples(num_samples)
@@ -43,33 +34,31 @@ with open('frequency_usage.csv', 'w', newline='') as file:
         # Find the peak frequency in the spectrum
         peak_freq = np.argmax(spectrum)
 
+        # Only print the peak frequency if it exceeds the squelch level and is not excluded
+        # The frequencies are excluded using a filter size 34.2 KHz
+        if spectrum[peak_freq] > squelch_level:
+            excluded = False
+            for excluded_start, excluded_end in [(393489966, 393490034), 
+                                                 (393339966, 393340034),
+                                                 (393239966, 393240034),
+                                                 (393089966, 393090034),
+                                                 (393064966, 393065034),
+                                                 (393029966, 393030034),
+                                                 (393389966, 393390034),
+                                                 (391159966, 391160034),
+                                                 (391089966, 391090034),
+                                                 (390864966, 390865034),
+                                                 (390794966, 390795034)]:
+                if (peak_freq > excluded_start) and (peak_freq < excluded_end):
+                    excluded = True
+                    break
 
-# Only print the peak frequency if it exceeds the squelch level and is not excluded
-# The frequencies are excluded using a filter size 34.2 KHz
-if spectrum[peak_freq] > squelch_level:
-    if (peak_freq > 393489966) and (peak_freq < 393490034):
-        pass
-    elif (peak_freq > 393339966) and (peak_freq < 393340034):
-        pass
-    elif (peak_freq > 393239966) and (peak_freq < 393240034):
-        pass
-    elif (peak_freq > 393089966) and (peak_freq < 393090034):
-        pass
-    elif (peak_freq > 393064966) and (peak_freq < 393065034):
-        pass
-    elif (peak_freq > 393029966) and (peak_freq < 393030034):
-        pass
-    elif (peak_freq > 393389966) and (peak_freq < 393390034):
-        pass
-    elif (peak_freq > 391159966) and (peak_freq < 391160034):
-        pass
-    elif (peak_freq > 391089966) and (peak_freq < 391090034):
-        pass
-    elif (peak_freq > 390864966) and (peak_freq < 390865034):
-        pass
-    elif (peak_freq > 390794966) and (peak_freq < 390795034):
-        pass
-    else:
-        print("Peak frequency: {:.6f} MHz".format(peak_freq / 1e6 + start_freq / 1e6))
-
-sdr.close()
+            if not excluded:
+                print("Peak frequency: {:.6f} MHz".format(peak_freq / 1e6 + start_freq / 1e6))
+                current_time = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+    
+                # Write the time and frequency to the file
+                writer.writerow([current_time, peak_freq / 1e6 + start_freq / 1e6])
+    
+                # Sleep for 1 minute
+                time.sleep(60)
