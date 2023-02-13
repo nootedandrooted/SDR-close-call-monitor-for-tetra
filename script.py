@@ -4,6 +4,7 @@ import time
 from rtlsdr import RtlSdr
 from pylab import *
 from rtlsdr import *
+import csv
 
 # Set the SDR device parameters
 sdr = RtlSdr()
@@ -29,6 +30,18 @@ samples = sdr.read_samples(num_samples)
 spectrum = np.abs(np.fft.fftshift(np.fft.fft(samples)))
 # Find the peak frequency in the spectrum
 peak_freq = np.argmax(spectrum)
+
+with open('frequency_usage.csv', 'w', newline='') as file:
+    writer = csv.writer(file)
+    writer.writerow(['Time', 'Frequency (MHz)'])
+    
+    while True:
+        # Read samples from the SDR device
+        samples = sdr.read_samples(num_samples)
+        # Convert the samples to a power spectrum
+        spectrum = np.abs(np.fft.fftshift(np.fft.fft(samples)))
+        # Find the peak frequency in the spectrum
+        peak_freq = np.argmax(spectrum)
 
 
 # Only print the peak frequency if it exceeds the squelch level and is not excluded
