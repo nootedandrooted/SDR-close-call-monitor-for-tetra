@@ -37,7 +37,6 @@ with open('frequency_usage.csv', 'w', newline='') as file:
         # Only print the peak frequency if it exceeds the squelch level and is not excluded
         # The frequencies are excluded using a filter size 34.2 KHz
         if spectrum[peak_freq] > squelch_level:
-                if spectrum[peak_freq] > squelch_level:
                     if (peak_freq > 393489966) and (peak_freq < 393490034):
                         pass
                     elif (peak_freq > 393339966) and (peak_freq < 393340034):
