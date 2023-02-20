@@ -2,6 +2,7 @@
 SDR close call monitor for TETRA
 
 License: MIT
+
 Description
 
 This project is a simple script that reads samples from one or two SDR devices, calculates the power spectrum of the samples, and detects the peak frequency in the spectrum. If the peak frequency exceeds a certain squelch level and is not on a blacklist, the script will print a warning and play a sound. This can be used as a "close call" monitor for TETRA frequencies. 
