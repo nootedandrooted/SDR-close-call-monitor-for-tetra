@@ -1,3 +1,7 @@
+# This is the same thing as script2.py but for a RTL-SDR device with a different serial number
+# Due to the hardware limitations of RTL-SDR the device can only handle a bandwidth of 2.56Mhz stable. Therefore two RTL-SDR devices are needed to cover the whole TETRA frequencies.
+# This script is set up for VIRVE frequencies.
+
 import time
 import numpy as np
 from rtlsdr import RtlSdr
@@ -10,9 +14,9 @@ sdr.sample_rate = 2.4e6  # Hz
 sdr.freq_correction = 60   # PPM
 sdr.gain = 30              # dB
 
-# Set the frequency range to scan (390MHz-392.5MHz)
-start_freq = 392e6  # Hz
-end_freq = 394e6  # Hz
+# Set the frequency range to scan (390.0MHz-392.5MHz)
+start_freq = 390e6  # Hz
+end_freq = 3925e5  # Hz
 sdr.center_freq = (start_freq + end_freq) / 2
 
 
