@@ -9,26 +9,25 @@ from playsound import playsound
 
 # Set the SDR device parameters
 sdr = RtlSdr(serial_number='00000001')
-sdr.sample_rate = 2.4e6  # Hz
+sdr.sample_rate = 2e6  # Hz
 
-sdr.freq_correction = 60   # PPM
+sdr.freq_correction = 18   # PPM
 sdr.gain = 30              # dB
 
-# Set the frequency range to scan (390.0MHz-392.5MHz)
-start_freq = 390e6  # Hz
-end_freq = 3925e5  # Hz
-sdr.center_freq = (start_freq + end_freq) / 2
+# Set the frequency range to scan (392MHz-394MHz)
+start_freq = 392e6  # Hz
+end_freq = 394e6  # Hz
+sdr.center_freq = (start_freq + end_freq) / 2 
 
 
 # Set the number of samples to read at a time
 num_samples = 2**16
 
 # Set the threshold for the squelch level
-squelch_level = -40
+squelch_level = -30
 
 # Create the blacklist
 blacklist = []
-
 
 # Run for 60 seconds
 print("Scanning for frequencies to be blacklisted. This will take a minute.")
@@ -49,7 +48,7 @@ while time.time() < t_end:
     peak_freq3 = freq_range3[peak_index3]
 
     # Convert peak frequency to MHz
-    peak_freq_mhz3 = f"{peak_freq3 / 1e6:.9f}"
+    peak_freq_mhz3 = f"{peak_freq3 / 1e6:.3f}"
 
     for i in blacklist:
         if i == peak_freq_mhz3:
@@ -60,47 +59,36 @@ while time.time() < t_end:
 
 print(f"The following frequencie(s) are blacklisted: {blacklist}")
 print("Blacklist created successfully!")
+print("CTRL + c to stop")
 
+# The main loop with exception handling
+try:
+    while True:
+        # Read samples from the SDR device
+        samples = sdr.read_samples(num_samples)
 
+        # Calculate the frequency range of the samples
+        freq_range = np.linspace(start_freq, end_freq, num_samples, endpoint=False)
 
-while True:
-    # Read samples from the SDR device
-    samples = sdr.read_samples(num_samples)
+        # Convert the samples to a power spectrum
+        spectrum = np.abs(np.fft.fftshift(np.fft.fft(samples)))
 
-    # Calculate the frequency range of the samples
-    freq_range = np.linspace(start_freq, end_freq, num_samples, endpoint=False)
+        # Find the peak frequency in the spectrum
+        peak_index = np.argmax(spectrum)
+        peak_freq = freq_range[peak_index]
 
-    # Convert the samples to a power spectrum
-    spectrum = np.abs(np.fft.fftshift(np.fft.fft(samples)))
+        # Convert peak frequency to MHz
+        peak_freq_mhz = f"{peak_freq / 1e6:.3f}"
 
-    # Find the peak frequency in the spectrum
-    peak_index = np.argmax(spectrum)
-    peak_freq = freq_range[peak_index]
-
-    # Convert peak frequency to MHz
-    peak_freq_mhz = f"{peak_freq / 1e6:.9f}"
-
-    # Read another sample to compare with the first sample
-    samples2 = sdr.read_samples(num_samples)
-
-    # Calculate the frequency range of the samples
-    freq_range2 = np.linspace(start_freq, end_freq, num_samples, endpoint=False)
-
-    # Convert the samples to a power spectrum
-    spectrum2 = np.abs(np.fft.fftshift(np.fft.fft(samples2)))
-
-    # Find the peak frequency in the spectrum
-    peak_index2 = np.argmax(spectrum2)
-    peak_freq2 = freq_range2[peak_index2]
-
-    # Convert peak frequency to MHz
-    peak_freq2_mhz2 = f"{peak_freq2 / 1e6:.9f}"
-
-    # Only print the peak frequency if it exceeds the squelch level and is not excluded
-    if spectrum[peak_index] > squelch_level and peak_freq_mhz in blacklist:
-        pass
-    else:
-        print(f"Peak frequency detected but no enough difference between samples...: {peak_freq_mhz} MHz")
-        if abs(peak_freq2 - peak_freq) > 10000:
+        # Only print the peak frequency if it exceeds the squelch level and is not excluded
+        if spectrum[peak_index] > squelch_level and peak_freq_mhz in blacklist:
+            pass
+        else:
             print(f"Peak frequency detected: {peak_freq_mhz}Mhz")
             playsound('/home/pop/Downloads/warning.wav')
+            time.sleep(1)
+except KeyboardInterrupt:
+    print("Bye!")
+finally:
+    # Close the SDR
+    sdr.close()
