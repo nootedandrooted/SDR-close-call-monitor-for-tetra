@@ -13,7 +13,7 @@ This project is for a small school project and will later be modified to upload 
 To-do list (not in any particular order):
 
 -    Improve user-friendliness
--    Add exception handling
+-    ~~Add exception handling~~
 -    Test and determine the correct levels of squelch, etc.
 -    Make this script work with a Raspberry Pi 4
 -    Create an LED and/or sound warning system (to be used in a car)
