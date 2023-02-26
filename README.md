@@ -1,6 +1,6 @@
 # SDR Close Call Monitor for TETRA
 
-License: MIT
+License: GPL-3.0
 
 Description:
 
@@ -54,4 +54,4 @@ If you would like to contribute to this project, feel free to submit a pull requ
 
 License:
 
-This project is licensed under the terms of the MIT license. See the LICENSE file for more information.
+This project is licensed under the terms of the GPL-3.0 license. See the LICENSE file for more information.
